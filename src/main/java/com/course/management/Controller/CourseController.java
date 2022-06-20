@@ -137,29 +137,28 @@ public class CourseController {
         }
 
     }
-/*
+
     @PostMapping("/students/{studentId}/courses")
     public ResponseEntity<Course> addCourse(@PathVariable(value = "studentId") Integer studentId, @RequestBody Course courseRequest) {
-        Optional<Course> course = studentRepository.findById(studentId).map(student -> {
-            int courseId = courseRequest.getId();
-
-            if (courseId != 0) {
-                Optional<Course> _course = courseRepository.findById(courseId);
-                if(!_course.isPresent()) {
-                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-                }
-                student.addCourse(_course.get());
-                studentRepository.save(student);
-                return _course;
+        try{
+            Optional<Student> student = studentRepository.findById(studentId);
+            if(!student.isPresent()){
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-
-            // add and create new Course
-            student.addCourse(courseRequest);
-            return courseRepository.save(courseRequest);
-        });
-        return new ResponseEntity<>(course, HttpStatus.CREATED);
+            Optional<Course> course = courseRepository.findById(courseRequest.getId());
+            if(!course.isPresent()){
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            Student _student = student.get();
+            _student.addCourse(course.get());
+            studentRepository.save(_student);
+            return new ResponseEntity<>(course.get(), HttpStatus.CREATED);
+        }catch(Exception e){
+            logger.info(e.toString());
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
-*/
+
     @DeleteMapping("/students/{studentId}/courses/{courseId}")
     public ResponseEntity<HttpStatus> deleteCourseFromStudent(@PathVariable(value = "studentId") Integer studentId, @PathVariable(value = "courseId") Integer courseId) {
         Optional<Student> student = studentRepository.findById(studentId);
